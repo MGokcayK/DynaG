@@ -1,0 +1,9 @@
+graft dynag
+
+include mit.LICENSE
+include example.py
+include setup.py
+include README.md
+include MANIFEST.in
+
+global-exclude *.py[co] __pycache__
