@@ -1,10 +1,5 @@
-# taken from https://github.com/Shot511/OpenGLSampleCmake/blob/master/CMakeLists.txt
-
 cmake_minimum_required(VERSION 3.10)
 project(DynaG-renderer)
-
-# Add .lib files
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
 if(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE "Release")
@@ -12,27 +7,43 @@ endif()
 
 SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE})
 
-
-# Add source files
-file(GLOB_RECURSE SOURCE_FILES 
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-	
-# Add header files
-file(GLOB_RECURSE HEADER_FILES 
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
-
-# Configure assets header file
-include_directories(${CMAKE_BINARY_DIR}/src)
+# Add source and header files
+set(RENDERER_FILES 
+	src/camera.cpp
+	src/camera.h
+	src/gWindow.cpp
+	src/gWindow.h
+	src/mesh.cpp
+	src/mesh.h
+	src/model.cpp
+	src/model.h
+	src/ren_api.cpp
+	src/ren_api.h
+	src/shader.h
+)
 	
 # Define the executable/shared object or dynamic library
-add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
-#add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_library(${PROJECT_NAME} SHARED ${RENDERER_FILES})
+
+# Set C++ version as 17
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+
+# Add .lib files
+target_link_directories(${PROJECT_NAME} PUBLIC libs)
+
+#target_include_directories(${PROJECT_NAME} PUBLIC src)
 
 if (WIN32)	
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+	endif()
+	if(MSVC)
+		if (MSVC_VERSION GREATER_EQUAL 1910) #msvc version of visual studio 2017 or higher
+			set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FASTLINK")
+		else()
+			set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG")
+		endif()
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
 	endif()
 endif()
 
@@ -74,18 +85,15 @@ find_package(STB REQUIRED)
 message(STATUS "Found STB in ${STB_INCLUDE_DIR}")
 
 # GLAD
-set(GLAD_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include/glad")
-    
-# Compile as static library 
-file(GLOB GLAD_HEADERS ${GLAD_PATH}/glad.h) 
-if (WIN32)
-	add_library(GLAD ${CMAKE_CURRENT_SOURCE_DIR}/src/glad.c)
-else()
-	add_library(GLAD SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/glad.c)
-endif()
-target_include_directories(GLAD PUBLIC ${GLAD_PATH})
+set(GLAD_FILES
+	"${CMAKE_CURRENT_SOURCE_DIR}/src/glad.c"
+)    
 
-set_target_properties(GLAD
+add_library(glad ${GLAD_FILES})
+
+target_include_directories(glad PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+set_target_properties(glad
     PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/libs"
     ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/libs"
@@ -102,12 +110,10 @@ set(IMGUI_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/include/imgui")
     
 # Compile as static library 
 file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp) 
-if (WIN32)
-	add_library(imgui ${IMGUI_SOURCES})
-else()
-	add_library(imgui SHARED ${IMGUI_SOURCES})
-endif()
-target_include_directories(imgui PUBLIC ${IMGUI_PATH})
+
+add_library(imgui ${IMGUI_SOURCES})
+
+target_include_directories(imgui PUBLIC ${IMGUI_PATH} ${GLFW3_INCLUDE_DIR})
 
 set_target_properties(imgui
     PROPERTIES
@@ -125,25 +131,24 @@ file(COPY ${data} DESTINATION resources)
 
 # Put all libraries into a variable
 if (WIN32)
-	set(LIBS glfw3 GLAD opengl32 assimp imgui )
+	set(LIBS glfw3 glad opengl32 assimp imgui )
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		set(LIBS gdi32)
 	endif()
 else()
-	set(LIBS glfw GLAD assimp imgui)
+	set(LIBS glfw glad assimp imgui)
 #set(LIBS X11 Xrandr Xinerama Xxf86vm Xcursor GL dl pthread)
 endif()
 
-
-
 # Define the include DIRs
-include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/src"
-	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+target_include_directories(${PROJECT_NAME} PUBLIC
+	src
+	include
 )
 
 # Define the link libraries
 target_link_libraries(${PROJECT_NAME} ${LIBS})
+add_dependencies(${PROJECT_NAME} glad imgui)
 
 
 # Create virtual folders to make it look nicer in VS
@@ -166,3 +171,4 @@ if(MSVC_IDE)
 	# Run macro
 	GroupSources(src)
 endif()
+

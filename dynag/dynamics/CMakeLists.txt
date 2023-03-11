@@ -1,32 +1,40 @@
 cmake_minimum_required(VERSION 3.10)
 project(DynaG-dynamics)
 
-# Add .lib files
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
-
 if(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE "Release")
 endif()
 
 SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE})
 
-
 # Add source files
-file(GLOB_RECURSE SOURCE_FILES 
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-	
-# Add header files
-file(GLOB_RECURSE HEADER_FILES 
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+set(DYNAMICS_FILES
+	src/dynamics.cpp
+	src/dynamics.h
+	src/dyn_api.cpp
+	src/dyn_api.h
+	src/error_handler.cpp
+	src/error_handler.h
+	src/helicopter/helicopter_dynamics.cpp
+	src/helicopter/helicopter_dynamics.h
+	src/kinematics.cpp
+	src/kinematics.h
+	src/lookup.cpp
+	src/lookup.h
+	src/utils.cpp
+	src/utils.h
+	src/vectorspace.cpp
+	src/vectorspace.h
+)
 
-# Configure assets header file
-include_directories(${CMAKE_BINARY_DIR}/src)
-	
 # Define the executable/shared object or dynamic library
-add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
-#add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_library(${PROJECT_NAME} SHARED ${DYNAMICS_FILES})
+
+# Set C++ version as 17
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+
+# Add .lib files
+target_link_directories(${PROJECT_NAME} PUBLIC libs)
 
 if (WIN32)	
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -60,9 +68,9 @@ set_target_properties(${PROJECT_NAME}
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
 # Define the include DIRs
-include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/src"
-	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+target_include_directories(${PROJECT_NAME} PUBLIC
+	src
+	include
 )
 
 #######################################
