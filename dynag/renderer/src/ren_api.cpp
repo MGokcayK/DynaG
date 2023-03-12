@@ -1,27 +1,27 @@
 #include "ren_api.h"
 
 
-Window* createWindow(const unsigned int WIDTH,
+WindowBase* createWindow(const unsigned int WIDTH,
 		const unsigned int HEIGHT,
 		const char* title)
 {
-	return new Window(WIDTH, HEIGHT, title);
+	return new OpenGL::Window(WIDTH, HEIGHT, title);
 }
 
 
-void close(Window* window)
+void close(WindowBase* window)
 {
 	glfwSetWindowShouldClose(window->wWindow, true);
 }
 
 
-bool isClose(Window* window)
+bool isClose(WindowBase* window)
 {
 	return glfwWindowShouldClose(window->wWindow);
 }
 
 
-void render(Window* window)
+void render(WindowBase* window)
 {
 	window->render();
 }
@@ -32,49 +32,49 @@ void terminateWindow()
 	glfwTerminate();
 }
 
-Model* createModel(char* model_path, char* vertex_shader_file_path, char* fragment_shader_file_path)
+ModelBase* createModel(char* model_path, char* vertex_shader_file_path, char* fragment_shader_file_path)
 {
-	return new Model(model_path, vertex_shader_file_path, fragment_shader_file_path);
+	return new OpenGL::Model(model_path, vertex_shader_file_path, fragment_shader_file_path);
 }
 
 
-void addPermanent2Window(Window* window, Model* model)
+void addPermanent2Window(OpenGL::Window* window, ModelBase* model)
 {
 	window->addPermanentDrawables(model);
 }
 
 
-void addInstantaneous2Window(Window* window, Model* model)
+void addInstantaneous2Window(OpenGL::Window* window, ModelBase* model)
 {
 	window->addInstantaneousDrawables(model);
 }
 
 
-void translateModel(Model* model, float x, float y, float z)
+void translateModel(ModelBase* model, float x, float y, float z)
 {
 	model->translate(glm::vec3(x, y, z));
 }
 
 
-void rotateModel(Model* model, float angle, float x, float y, float z)
+void rotateModel(ModelBase* model, float angle, float x, float y, float z)
 {
 	model->rotate(angle, glm::vec3(x, y, z));
 }
 
 
-void scaleModel(Model* model, float x, float y, float z)
+void scaleModel(ModelBase* model, float x, float y, float z)
 {
 	model->scale(glm::vec3(x, y, z));
 }
 
 
-float getFps(Window* window)
+float getFps(WindowBase* window)
 {
 	return window->fFPS;
 }
 
 
-void setFps(Window* window, float fps)
+void setFps(WindowBase* window, float fps)
 {
 	window->fFPSLimit = fps;
 	std::chrono::nanoseconds dt{static_cast<long int>( 1000000000.0f/window->fFPSLimit)};
@@ -82,7 +82,7 @@ void setFps(Window* window, float fps)
 }
 
 
-Camera* getCamera(Window* window)
+Camera* getCamera(WindowBase* window)
 {
 	return window->cmCamera;
 }
@@ -102,25 +102,25 @@ float* getCameraPos(Camera* camera)
 
 
 
-bool isVisible(Window* window)
+bool isVisible(WindowBase* window)
 {
 	int visible = glfwGetWindowAttrib(window->wWindow, GLFW_VISIBLE);
 	return visible;
 }
 
 
-void hideWindow(Window* window)
+void hideWindow(WindowBase* window)
 {
 	glfwHideWindow(window->wWindow);
 }
 
 
-void showWindow(Window* window)
+void showWindow(WindowBase* window)
 {
 	glfwShowWindow(window->wWindow);
 }
 
-int createGuiTextVector(Window* window, const char* title,
+int createGuiTextVector(WindowBase* window, const char* title,
 									float pos_x, float pos_y,
 									float size_x, float size_y)
 {
@@ -129,19 +129,19 @@ int createGuiTextVector(Window* window, const char* title,
 	return window->createGuiText(title, pos, size);
 }
 
-void addGuiTextAllLines(Window* window, int v_guiText_ind, int size, char** _str, float* _val)
+void addGuiTextAllLines(WindowBase* window, int v_guiText_ind, int size, char** _str, float* _val)
 {
 	for (int i = 0; i < size; i++)
 		window->addItem2GuiText(v_guiText_ind, _str[i], &_val[i] );
 }
 
-void addGuiTextLine(Window* window, int v_guiText_ind, char* _text, float* _val)
+void addGuiTextLine(WindowBase* window, int v_guiText_ind, char* _text, float* _val)
 {
 	float* v = (float*)malloc(1);
 	window->addItem2GuiText(v_guiText_ind, strdup(_text), v);
 }
 
-void setGuiTextAllValues(Window* window, int v_guiText_ind, int size, float* _val)
+void setGuiTextAllValues(WindowBase* window, int v_guiText_ind, int size, float* _val)
 {
 	for (int i = 0; i < size; i++)
 	{
@@ -149,53 +149,53 @@ void setGuiTextAllValues(Window* window, int v_guiText_ind, int size, float* _va
 	}
 }
 
-void setGuiTextAllTextLines(Window* window, int v_guiText_ind, int size, char** _text)
+void setGuiTextAllTextLines(WindowBase* window, int v_guiText_ind, int size, char** _text)
 {
 	for (int i = 0; i < size; i++)
 		window->setGuiTextLine(v_guiText_ind, i, _text[i]);
 }
 
-void setGuiTextLineValue(Window* window, int v_guiText_ind, int iLineNumber, float* _val)
+void setGuiTextLineValue(WindowBase* window, int v_guiText_ind, int iLineNumber, float* _val)
 {
 	window->setGuiTextLineValue(v_guiText_ind, iLineNumber, _val);
 }
 
-void setGuiTextLine(Window* window, int v_guiText_ind, int iLineNumber, char* _text)
+void setGuiTextLine(WindowBase* window, int v_guiText_ind, int iLineNumber, char* _text)
 {
 	window->setGuiTextLine(v_guiText_ind, iLineNumber, _text);
 }
 
 
-void setBool(Model* model, char* name, bool value)
+void setBool(OpenGL::Model* model, char* name, bool value)
 {
-	container<bool>* temp = new container<bool>();
+	OpenGL::container<bool>* temp = new OpenGL::container<bool>();
 	temp->name = name;
 	temp->data = value;
 	temp->reset = !value;
 	model->vBooleanContainer.push_back(temp);
 }
 
-void setInt(Model* model, char* name, int value)
+void setInt(OpenGL::Model* model, char* name, int value)
 {
-	container<int>* temp = new container<int>();
+	OpenGL::container<int>* temp = new OpenGL::container<int>();
 	temp->name = name;
 	temp->data = value;
 	temp->reset = (int)0;
 	model->vIntegerContainer.push_back(temp);
 }
 
-void setFloat(Model* model, char* name, float value)
+void setFloat(OpenGL::Model* model, char* name, float value)
 {
-	container<float>* temp = new container<float>();
+	OpenGL::container<float>* temp = new OpenGL::container<float>();
 	temp->name = name;
 	temp->data = value;
 	temp->reset = 0.0f;
 	model->vFloatContainer.push_back(temp);
 }
 
-void setVec2(Model* model, char* name, float* value)
+void setVec2(OpenGL::Model* model, char* name, float* value)
 {
-	container<glm::vec2>* temp = new container<glm::vec2>();
+	OpenGL::container<glm::vec2>* temp = new OpenGL::container<glm::vec2>();
 	temp->name = name;
 	temp->data = glm::make_vec4(value);
 	temp->reset = glm::vec2(0.0f);
@@ -203,36 +203,36 @@ void setVec2(Model* model, char* name, float* value)
 	delete temp;
 }
 
-void setVec3(Model* model, char* name, float* value)
+void setVec3(OpenGL::Model* model, char* name, float* value)
 {
-	container<glm::vec3>* temp = new container<glm::vec3>();
+	OpenGL::container<glm::vec3>* temp = new OpenGL::container<glm::vec3>();
 	temp->name = name;
 	temp->data = glm::make_vec3(value);
 	temp->reset = glm::vec3(0.0f);
 	model->vVec3Container.push_back(temp);
 }
 
-void setVec4(Model* model, char* name, float* value)
+void setVec4(OpenGL::Model* model, char* name, float* value)
 {
-	container<glm::vec4>* temp = new container<glm::vec4>();
+	OpenGL::container<glm::vec4>* temp = new OpenGL::container<glm::vec4>();
 	temp->name = name;
 	temp->data = glm::make_vec4(value);
 	temp->reset = glm::vec4(0.0f);
 	model->vVec4Container.push_back(temp);
 }
 
-void setMat2(Model* model, char* name, float* value)
+void setMat2(OpenGL::Model* model, char* name, float* value)
 {
-	container<glm::mat2>* temp = new container<glm::mat2>();
+	OpenGL::container<glm::mat2>* temp = new OpenGL::container<glm::mat2>();
 	temp->name = name;
 	temp->data = glm::make_mat2(value);
 	temp->reset = glm::mat2(0.0f);
 	model->vMat2Container.push_back(temp);
 }
 
-void setMat3(Model* model, char* name, float* value)
+void setMat3(OpenGL::Model* model, char* name, float* value)
 {
-	container<glm::mat3>* temp = new container<glm::mat3>();
+	OpenGL::container<glm::mat3>* temp = new OpenGL::container<glm::mat3>();
 	temp->name = name;
 	temp->data = glm::make_mat3(value);
 	temp->reset = glm::mat3(0.0f);
@@ -240,9 +240,9 @@ void setMat3(Model* model, char* name, float* value)
 }
 
 
-void setMat4(Model* model, char* name, float* value)
+void setMat4(OpenGL::Model* model, char* name, float* value)
 {
-	container<glm::mat4>* temp = new container<glm::mat4>();
+	OpenGL::container<glm::mat4>* temp = new OpenGL::container<glm::mat4>();
 	temp->name = name;
 	temp->data = glm::make_mat4(value);
 	temp->reset = glm::mat4(0.0f);

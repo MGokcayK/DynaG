@@ -1,31 +1,22 @@
-/*
-* DynaG Renderer C++ / Windowing
-*
-* Window class for handling window implementation based on https://learnopengl.com
-* It is using GLFW for windowing operations.
-* 
-* Author : @MGokcayK
-*
-* C.Date : 04/05/2021
-* Update : 04/05/2021 - Create & Implementation // @MGokcayK
-*/
+#ifndef BASE_WINDOW
+#define BASE_WIDNOW
 
-#ifndef GWINDOW_H
-#define GWINDOW_H
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
-#include "camera.h"
+#include <glm/glm.hpp>
+
 #include "model.h"
-
+#include "camera.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
-
-#include <GLFW/glfw3.h>
 
 #include <iostream>
 
 #include <chrono>
 #include <thread>
+#include <vector>
+#include <variant>
 
 // Create basic structure for ImGui text. With this structure
 // text gui has only one values for a text. 
@@ -46,38 +37,31 @@ struct guiTextSection
     ImVec2 vSize;
 };
 
-// Class for GLFW-Window.
-class Window
+class WindowBase
 {
-private:
+protected:
     // Window properties and its variables.
-    float fScrWidth;
-    float fScrHeight;
-    std::chrono::duration<long, std::nano> durDeltaTime;
+    float fScrWidth = 0.0f;
+    float fScrHeight = 0.0f;
+    std::chrono::duration<long, std::nano> durDeltaTime = std::chrono::nanoseconds(0);
     std::chrono::steady_clock::time_point tpLastFrame = std::chrono::steady_clock::now();
     float fLastX = 0.0f;
     float fXOffSet = 0.0f;
     float fLastY = 0.0f;
     float fYOffSet = 0.0f;
     bool bFirstMouse = true;
-    unsigned int iUbo; // uniform buffer objects for UBObjects
-    unsigned int iLight; // uniform buffer objects for LightBlocks
-    unsigned int iFog; // uniform buffer objects for FogBlocks
-    unsigned int iDepthMapFbo; // depth frame buffer for shadow
-    unsigned int iDepthMap; // depth texture
-    glm::vec4 vLightPosition;
-
+    glm::vec4 vLightPosition = glm::vec4(0.0f);
 
     // Drawable objects vectors. It stores object's pointer to call when they 
-    // need to draw. 
-    std::vector<Model*> vPermanentDrawables;
-	std::vector<Model*> vInstantaneousDrawables;
+        // need to draw. 
+    std::vector<ModelBase*> vPermanentDrawables;
+    std::vector<ModelBase*> vInstantaneousDrawables;
 
     // GuiText temporary vector for gui render.
     std::vector<guiText> vGuiText;
 
     // Drawing of window which called by render function.
-    void draw();
+    virtual void draw() = 0;
 
     // Sleep the window for sync the FPS of window when the FPS is higher
     // than dynamic system FPS (which calculated in Python side).
@@ -88,33 +72,33 @@ private:
 
 public:
     // Base window if GLFW.
-    GLFWwindow* wWindow;
+    GLFWwindow* wWindow = nullptr;
 
     // Camera class. 
-    Camera* cmCamera;
+    Camera* cmCamera = nullptr;
 
     // FPS variables and dt which is in nanoseconds.
     float fFPS = (float)1e-7;
-    float fFPSLimit = 100.0; 
-    std::chrono::nanoseconds secDt{static_cast<long int>( 1000000000.0f/fFPSLimit)};
+    float fFPSLimit = 100.0;
+    std::chrono::nanoseconds secDt{ static_cast<long int>(1000000000.0f / fFPSLimit) };
 
     // Text vector pointer vector which stores different 
     // guiTextSection pointer.
     std::vector<guiTextSection*> vGuiTextSection;
 
     // Basic Window constructor.
-    Window() {};
+    WindowBase() {};
 
     // Window constructor with Width, Height and Title parameters.
-    Window(const unsigned int SCR_WIDTH,
-           const unsigned int SCR_HEIGHT,
-           const char* title);
-    
+    WindowBase(const unsigned int SCR_WIDTH,
+        const unsigned int SCR_HEIGHT,
+        const char* title) {};
+
     // Render the Window.
-    void render();
+    virtual void render() = 0;
 
     // Render the Dear ImGui.
-    void renderGUI();
+    virtual void renderGUI() = 0;
 
     // Create empty guiText vector and its adress.
     int createGuiText(const char* title, ImVec2 position, ImVec2 size);
@@ -126,24 +110,16 @@ public:
 
     void setGuiTextLine(int iGuiTextInd, int iLineNumber, char* cText);
 
-    // Adding model as permanent drawable objects of the Window.
-    // It drawing the model until the window closed.
-    void addPermanentDrawables(Model* drawable);
-
-    // Adding model as instantaneous drawable objects of the Window.
-    // It drawing the model only at that render time.
-	void addInstantaneousDrawables(Model* drawable);
-
-    // Callbacks for OpenGL.
+    // Callbacks.
 
     // When window size changed, GLFW call this callback function.
-    void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
-    
+    virtual void frameBufferSizeCallback(GLFWwindow* window, int width, int height) = 0;
+
     // When mouse moves, GLFW call this call function.
-    void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+    virtual void mouseCallback(GLFWwindow* window, double xpos, double ypos) = 0;
 
     // When mouse scroll changed (wheel rotate etc.), GLFW call this function.
-    void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    virtual void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) = 0;
 
     // GLFW need static callback functions. To handle it, some capsulation should
     // be done. This function makes it.
@@ -152,10 +128,20 @@ public:
     // GLFW need static callback functions. To handle it, some capsulation should
     // be done. This function makes it.
     static void staticMouseCallback(GLFWwindow* window, double xpos, double ypos);
-    
+
     // GLFW need static callback functions. To handle it, some capsulation should
     // be done. This function makes it.
     static void staticScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-        
+
+
+    // Adding model as permanent drawable objects of the Window.
+    // It drawing the model until the window closed.
+    void addPermanentDrawables(ModelBase* drawable);
+
+    // Adding model as instantaneous drawable objects of the Window.
+    // It drawing the model only at that render time.
+    void addInstantaneousDrawables(ModelBase* drawable);
+
 };
+
 #endif

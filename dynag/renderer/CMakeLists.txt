@@ -9,17 +9,22 @@ SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE})
 
 # Add source and header files
 set(RENDERER_FILES 
-	src/camera.cpp
-	src/camera.h
-	src/gWindow.cpp
-	src/gWindow.h
 	src/mesh.cpp
 	src/mesh.h
-	src/model.cpp
-	src/model.h
 	src/ren_api.cpp
 	src/ren_api.h
 	src/shader.h
+    src/base/camera.cpp
+    src/base/camera.h
+    src/base/model.cpp
+    src/base/model.h
+    src/base/window.cpp
+    src/base/window.h
+	src/opengl/gl_window.cpp
+	src/opengl/gl_window.h
+    src/opengl/gl_model.cpp
+	src/opengl/gl_model.h
+	
 )
 	
 # Define the executable/shared object or dynamic library
