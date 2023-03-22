@@ -1,0 +1,6 @@
+☐ Solve when viewport size changes, gui text of right side should be moved.
+☐ Add PCH to comman usage includes.
+☐ Write macro for commmon usage like throwing runtime error.
+    ☐ Warning and Error logs writing macros!
+☐ Render vulkan model at each render call from api like opengl.
+    ☐ Implement its translate, rotate and scale methods

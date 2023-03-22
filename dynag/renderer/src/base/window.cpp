@@ -30,6 +30,11 @@ void WindowBase::preciseSleep(double seconds)
     while ((std::chrono::steady_clock::now() - start).count() / 1e9 < seconds);
 }
 
+GLFWwindow* WindowBase::getGLFWwindow() const
+{
+    return wWindow;
+}
+
 
 void WindowBase::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -95,6 +100,16 @@ void WindowBase::addInstantaneousDrawables(ModelBase* drawable)
     vInstantaneousDrawables.push_back(drawable);
 }
 
+WindowBase::~WindowBase()
+{
+    glfwDestroyWindow(wWindow);
+    glfwTerminate();
+}
+
+bool WindowBase::shouldClose()
+{
+    return glfwWindowShouldClose(wWindow);
+}
 
 int WindowBase::createGuiText(const char* title, ImVec2 position, ImVec2 size)
 {
@@ -123,6 +138,10 @@ void WindowBase::setGuiTextLineValue(int iGuiTextInd, int iLineNumber, float* fV
 
 void WindowBase::setGuiTextLine(int iGuiTextInd, int iLineNumber, char* cText)
 {
+#if _WIN32
+    vGuiTextSection[iGuiTextInd]->vText->at(iLineNumber).str = _strdup(cText);
+#else
     vGuiTextSection[iGuiTextInd]->vText->at(iLineNumber).str = strdup(cText);
+#endif
 }
 

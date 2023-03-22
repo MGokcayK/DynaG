@@ -55,16 +55,16 @@ class HelicopterGym(gym.Env, EzPickle):
         self.successed_time = 0 # time counter for successing task through time.
         self.set_max_time()
         self.set_target()
-        self.renderer = Renderer(w=1024, h=768, title='DynaG')
+        self.renderer = Renderer(w=1920, h=1080, title='DynaG')
         self.renderer.setFPS(FPS)
         self.helicopter.createRendererObject(self.renderer)        
         self.terrain = self.renderer.createModel('/resources/models/terrain/terrain.obj',
                                                  '/resources/shaders/terrain_vertex.vs',
                                                  '/resources/shaders/terrain_frag.fs')
         
-        self.renderer.addPermanentObject2Window(self.terrain)        
+        self.renderer.addPermanentObject2App(self.terrain)        
         self.sky = self.renderer.createModel('/resources/models/sky/sky.obj')
-        self.renderer.addPermanentObject2Window(self.sky)
+        self.renderer.addPermanentObject2App(self.sky)
         self._bGuiText = False
 
     # Setter functions for RL tasks

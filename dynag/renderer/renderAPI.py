@@ -32,99 +32,102 @@ def _to_encode(str_to_encode, encode_type = 'utf-8'):
     return str_to_encode.encode(encode_type)
 
 ###################################################################################
-lib.createWindow.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_char_p]
-lib.createWindow.restype = ctypes.c_void_p
+lib.createApplication.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.c_bool]
+lib.createApplication.restype = ctypes.c_void_p
 
-def createWindow(w, h, title):
+def createApplication(w, h, title, vulkan = False):
     """
-        Create window with parameters which are
-        >>> w     : Width of window
-        >>> h     : Height of window
-        >>> title : Title of window.
+        Create application with parameters which are
+        >>> w      : Width of window
+        >>> h      : Height of window
+        >>> title  : Title of window
+        >>> vulkan : Create application with Vulkan API.
     """
-    return lib.createWindow(w, h, ctypes.c_char_p(_to_encode(title)))  
+    return lib.createApplication(w, h, ctypes.c_char_p(_to_encode(title)), vulkan)  
 
 ###################################################################################
 lib.render.argtypes = [ctypes.c_void_p]
 lib.render.restype = ctypes.c_void_p
 
-def render(window):
+def render(application):
     """
-        Render window.
-        >>> window : Address of window which will be render.
+        Render application.
+        >>> application : Address of application which will be render.
     """
-    lib.render(window)
+    lib.render(application)
 
 ###################################################################################
 lib.close.argtypes = [ctypes.c_void_p]
 lib.close.restype = ctypes.c_void_p
 
-def close(window):
+def close(application):
     """
-        Close window.
-        >>> window : Address of window which will be closed.
+        Close application.
+        >>> application : Address of application which will be closed.
     """
-    lib.close(window)
+    lib.close(application)
 
 ###################################################################################
 lib.isClose.argtypes = [ctypes.c_void_p]
 lib.isClose.restype = ctypes.c_bool
 
-def isClose(window):
+def isClose(application):
     """
-        Check whether window is closed or not.
-        >>> window : Address of window which will be checked.
+        Check whether application is closed or not.
+        >>> application : Address of application which will be checked.
     """
-    return lib.isClose(window)  
+    return lib.isClose(application)  
 
 ###################################################################################
-lib.terminateWindow.argtypes = []
-lib.terminateWindow.restype = ctypes.c_void_p
+lib.terminateApplication.argtypes = []
+lib.terminateApplication.restype = ctypes.c_void_p
 
 def terminate():
     """
-        Terminate the OpenGL.
+        Terminate the application.
     """
-    lib.terminateWindow()
+    lib.terminateApplication()
 
 ###################################################################################
-lib.createModel.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
+lib.createModel.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
 lib.createModel.restype = ctypes.c_void_p
 
-def createModel(object_path, vertex_shader_path, fragment_shader_path):
+def createModel(application, object_path, vertex_shader_path, fragment_shader_path):
     """
         Create model with its shaders.
+        >>> application          : Application which model will be added.
         >>> object_path          : Path of `.obj` file which is the 3D model of object.
         >>> vertex_shader_path   : Path of vertex shader of object. 
         >>> fragment_shader_path : Path of fragment shader of object.
     """
-    return lib.createModel(ctypes.c_char_p(_to_encode(object_path)),
+    return lib.createModel(application,
+                            ctypes.c_char_p(_to_encode(object_path)),
                             ctypes.c_char_p(_to_encode(vertex_shader_path)),
                             ctypes.c_char_p(_to_encode(fragment_shader_path)))
 
 ###################################################################################
-lib.addPermanent2Window.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-lib.addPermanent2Window.restypes = ctypes.c_void_p
+lib.addPermanent2App.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+lib.addPermanent2App.restypes = ctypes.c_void_p
 
-def addPermanent2Window(window, model):
+def addPermanent2App(application, model):
     """
-        Add model as permanent drawables object to window.
-        >>> window : Address of window which model will be added as permanent drawable object.
-        >>> model  : Address of created drawable object. 
+        Add model as permanent drawables object to application.
+        >>> application : Address of application which model will be added as permanent drawable object.
+        >>> model       : Address of created drawable object. 
     """
-    lib.addPermanent2Window(window, model)
+    lib.addPermanent2App(application, model)
 
 ###################################################################################
-lib.addInstantaneous2Window.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-lib.addInstantaneous2Window.restypes = ctypes.c_void_p
+lib.addInstantaneous2App.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+lib.addInstantaneous2App.restypes = ctypes.c_void_p
 
-def addInstantaneous2Window(window, model):
+def addInstantaneous2App(application, model):
     """ 
-        Add model as instantaneous drawables object to window.
-        >>> window : Address of window which model will be added as instantaneous drawable object.
-        >>> model  : Address of created drawable object. 
+        Add model as instantaneous drawables object to application.
+        >>> application : Address of application which model will be added as instantaneous drawable object.
+        >>> model       : Address of created drawable object. 
     """
-    lib.addInstantaneous2Window(window, model)
+    lib.addInstantaneous2App(application, model)
     
 ###################################################################################
 lib.translateModel.argtypes = [ctypes.c_void_p, ctypes.c_float, 
@@ -175,34 +178,34 @@ def scaleModel(model, x, y, z):
 lib.getFps.argtypes = [ctypes.c_void_p]
 lib.getFps.restype = ctypes.c_float
 
-def getFps(window):
+def getFps(application):
     """
-        Get FPS from the window.
-        >>> window : Address of window which getting FPS.
+        Get FPS from the application.
+        >>> application : Address of application which getting FPS.
     """
-    return np.round(lib.getFps(window), 2)
+    return np.round(lib.getFps(application), 2)
 
 ###################################################################################
 lib.setFps.argtypes = [ctypes.c_void_p, ctypes.c_float]
 lib.setFps.restype = ctypes.c_void_p
 
-def setFps(window, fps):
+def setFps(application, fps):
     """
-        Set FPS of the window.
-        >>> window : Address of window which setting FPS.
+        Set FPS of the application.
+        >>> application : Address of application which setting FPS.
     """
-    lib.setFps(window, fps)
+    lib.setFps(application, fps)
 
 ###################################################################################
 lib.getCamera.argtypes = [ctypes.c_void_p]
 lib.getCamera.restype = ctypes.c_void_p
 
-def getCamera(window):
+def getCamera(application):
     """
-        Get Camera pointer of the window.
-        >>> window : Address of window which camera connected to it.
+        Get Camera pointer of the application.
+        >>> application : Address of application which camera connected to it.
     """
-    return lib.getCamera(window)
+    return lib.getCamera(application)
 
 ###################################################################################
 lib.setCameraPos.argtypes = [ctypes.c_void_p, ctypes.c_float,
@@ -234,62 +237,62 @@ def getCameraPos(camera):
 lib.isVisible.argtypes = [ctypes.c_void_p]
 lib.isVisible.restype = ctypes.c_bool
 
-def isVisible(window):
+def isVisible(application):
     """
-        Check whether the window is visible or not.
-        >>> window : Address of window which checking it is visible or not.
+        Check whether the application is visible or not.
+        >>> application : Address of application which checking it is visible or not.
     """
-    return lib.isVisible(window)
+    return lib.isVisible(application)
 
 ###################################################################################
 lib.hideWindow.argtypes = [ctypes.c_void_p]
 lib.hideWindow.restype = ctypes.c_void_p
 
-def hideWindow(window):
+def hideWindow(application):
     """
         Hide the window.
-        >>> window : Address of window which will be hided.
+        >>> application : Address of application which will be hided.
     """
-    lib.hideWindow(window)
+    lib.hideWindow(application)
 
 ###################################################################################
 lib.showWindow.argtypes = [ctypes.c_void_p]
 lib.showWindow.restype = ctypes.c_void_p
 
-def showWindow(window):
+def showWindow(application):
     """
-        Show the window.
-        >>> window : Address of window which will be showed.
+        Show the application.
+        >>> application : Address of application which will be showed.
     """
-    lib.showWindow(window)
+    lib.showWindow(application)
 
 ###################################################################################
 lib.createGuiTextVector.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float]
 lib.createGuiTextVector.restype = ctypes.c_int
 
-def createGuiTextVector(window, title, pos, size):
+def createGuiTextVector(application, title, pos, size):
     """
         Create guiText vector for guiTextSection.        
-        >>> window : Address of window which guiText rendered.
+        >>> application : Address of application which guiText rendered.
         >>> title  : Title of guiText.
         >>> pos    : Position of guiText as 2D.
         >>> size   : Size of guiText as 2D.
     """
     assert type(pos) == tuple and len(pos) == 2, 'Make sure that position of guiText should be tuple and has 2 element.'
     assert type(size) == tuple and len(size) == 2, 'Make sure that size of guiText should be tuple and has 2 element.'
-    return lib.createGuiTextVector(window, ctypes.c_char_p(_to_encode(title)), pos[0], pos[1], size[0], size[1])
+    return lib.createGuiTextVector(application, ctypes.c_char_p(_to_encode(title)), pos[0], pos[1], size[0], size[1])
 
 ###################################################################################
 lib.addGuiTextAllLines.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_char_p), np.ctypeslib.ndpointer(dtype=np.float32, flags='C_CONTIGUOUS')]
 lib.addGuiTextAllLines.restype = ctypes.c_void_p
 
-def addGuiTextAllLines(window, guiText, strn, val):
+def addGuiTextAllLines(application, guiText, strn, val):
     """
-        Add the str and val to guiText on window.
-        >>> window   : Address of window which guiText rendered.
-        >>> guiText  : Address of guiText which strn will be added.
-        >>> strn     : String of guiText row.
-        >>> val      : Value of related guiText row.
+        Add the str and val to guiText on application.
+        >>> application   : Address of application which guiText rendered.
+        >>> guiText       : Address of guiText which strn will be added.
+        >>> strn          : String of guiText row.
+        >>> val           : Value of related guiText row.
     """
     assert type(strn) == list, 'Please make sure that `str` values in form of list.'
     for ind, item in enumerate(strn):
@@ -300,48 +303,48 @@ def addGuiTextAllLines(window, guiText, strn, val):
     if type(val) != np.ndarray:
         val = np.array(val)
 
-    lib.addGuiTextAllLines(window, guiText, len(strn), strn_arr, val.astype(np.float32) )
+    lib.addGuiTextAllLines(application, guiText, len(strn), strn_arr, val.astype(np.float32) )
 ###################################################################################
 lib.addGuiTextLine.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_char_p, np.ctypeslib.ndpointer(dtype=np.float32, flags='C_CONTIGUOUS')]
 lib.addGuiTextLine.restype = ctypes.c_void_p
 
-def addGuiTextLine(window, guiText, text, val):
+def addGuiTextLine(application, guiText, text, val):
     """
-        Add text and val to guiText on window. 
+        Add text and val to guiText on application. 
 
-        >>> window   : Address of window which guiText rendered.
-        >>> guiText  : Address of guiText which strn will be added.
-        >>> text     : Text of related guiText row.
-        >>> val      : Value of related guiText row.
+        >>> application   : Address of application which guiText rendered.
+        >>> guiText       : Address of guiText which strn will be added.
+        >>> text          : Text of related guiText row.
+        >>> val           : Value of related guiText row.
     """
-    lib.addGuiTextLine(window, guiText, ctypes.c_char_p(_to_encode(text)), np.array([val], np.float32))
+    lib.addGuiTextLine(application, guiText, ctypes.c_char_p(_to_encode(text)), np.array([val], np.float32))
 
 ###################################################################################
 lib.setGuiTextAllValues.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, np.ctypeslib.ndpointer(dtype=np.float32, flags='C_CONTIGUOUS')]
 lib.setGuiTextAllValues.restype = ctypes.c_void_p
 
-def setGuiTextAllValues(window, guiText, val):
+def setGuiTextAllValues(application, guiText, val):
     """
-        Set all val to guiText on window. Value vector order should be same as 
+        Set all val to guiText on application. Value vector order should be same as 
         string order.
-        >>> window   : Address of window which guiText rendered.
-        >>> guiText  : Address of guiText which strn will be added.
-        >>> val      : Values of related guiText.
+        >>> application   : Address of application which guiText rendered.
+        >>> guiText       : Address of guiText which strn will be added.
+        >>> val           : Values of related guiText.
     """
     l = val.shape[0]
-    lib.setGuiTextAllValues(window, guiText, l, val.astype(np.float32) )
+    lib.setGuiTextAllValues(application, guiText, l, val.astype(np.float32) )
 
 ###################################################################################
 lib.setGuiTextAllTextLines.argtypes = [ctypes.c_void_p, ctypes.c_int,ctypes.c_int, ctypes.POINTER(ctypes.c_char_p),]
 lib.setGuiTextAllTextLines.restype = ctypes.c_void_p
 
-def setGuiTextAllTextLines(window, guiText, text):
+def setGuiTextAllTextLines(application, guiText, text):
     """
-        Set all text to guiText on window.
+        Set all text to guiText on application.
 
-        >>> window   : Address of window which guiText rendered.
-        >>> guiText  : Address of guiText which strn will be added.
-        >>> text     : Text of related guiText.
+        >>> application   : Address of application which guiText rendered.
+        >>> guiText       : Address of guiText which strn will be added.
+        >>> text          : Text of related guiText.
     """
     assert type(text) == list, 'Please make sure that `str` values in form of list.'
     for ind, item in enumerate(text):
@@ -350,39 +353,39 @@ def setGuiTextAllTextLines(window, guiText, text):
     strn_arr = (ctypes.c_char_p * (len(text)))()    
     strn_arr[:] = text
 
-    lib.setGuiTextAllTextLines(window, guiText, len(text), strn_arr)
+    lib.setGuiTextAllTextLines(application, guiText, len(text), strn_arr)
 
 ###################################################################################
 lib.setGuiTextLineValue.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, np.ctypeslib.ndpointer(dtype=np.float32, shape=(1), flags='C_CONTIGUOUS')]
 lib.setGuiTextLineValue.restype = ctypes.c_void_p
 
-def setGuiTextLineValue(window, guiText, lineNumber, val):
+def setGuiTextLineValue(application, guiText, lineNumber, val):
     """
-        Set the val of guiText on window. 
+        Set the val of guiText on application. 
 
-        >>> window     : Address of window which guiText rendered.
-        >>> guiText    : Address of guiText which strn will be added.
-        >>> lineNumber : Line number of guiText to set.
-        >>> val        : Value of related guiText row.
+        >>> application     : Address of application which guiText rendered.
+        >>> guiText         : Address of guiText which strn will be added.
+        >>> lineNumber      : Line number of guiText to set.
+        >>> val             : Value of related guiText row.
     """
     val = np.array([val], np.float32)
-    lib.setGuiTextLineValue(window, guiText, lineNumber, val)
+    lib.setGuiTextLineValue(application, guiText, lineNumber, val)
 
 ###################################################################################
 lib.setGuiTextLine.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_char_p]
 lib.setGuiTextLine.restype = ctypes.c_void_p
 
-def setGuiTextLine(window, guiText, lineNumber, text):
+def setGuiTextLine(application, guiText, lineNumber, text):
     """
-        Set the text of guiText on window. 
+        Set the text of guiText on application. 
 
-        >>> window     : Address of window which guiText rendered.
-        >>> guiText    : Address of guiText which strn will be added.
-        >>> lineNumber : Line number of guiText to set.
-        >>> text       : Value of related guiText row.
+        >>> application     : Address of application which guiText rendered.
+        >>> guiText         : Address of guiText which strn will be added.
+        >>> lineNumber      : Line number of guiText to set.
+        >>> text            : Value of related guiText row.
     """
     print(text, hex(id(text)))
-    lib.setGuiTextLine(window, guiText, lineNumber, bytes(str(text), 'utf-8'))
+    lib.setGuiTextLine(application, guiText, lineNumber, bytes(str(text), 'utf-8'))
 
 ###################################################################################
 lib.setBool.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_bool]

@@ -21,7 +21,7 @@ class Renderer(object):
         self.width = w
         self.height = h
         self.title = title
-        self.window = renderAPI.createWindow(self.width, self.height, self.title)        
+        self.app = renderAPI.createApplication(self.width, self.height, self.title, True)        
         self.camera = self.getCamera()
         self.guiTextList = []
 
@@ -29,19 +29,19 @@ class Renderer(object):
         """
             Render the `Renderer's` window.
         """
-        renderAPI.render(self.window)
+        renderAPI.render(self.app)
 
     def close(self):
         """
             Close the `Renderer's` window.
         """
-        renderAPI.close(self.window)
+        renderAPI.close(self.app)
 
     def isClose(self):
         """
             Check whether the `Renderer's` window is closed or not.
         """
-        return renderAPI.isClose(self.window)
+        return renderAPI.isClose(self.app)
     
     def terminate(self):
         """
@@ -61,25 +61,27 @@ class Renderer(object):
         """
     
         if rel_path:
-            return renderAPI.createModel(os.path.dirname(os.path.realpath(__file__)) + rel_path, 
+            return renderAPI.createModel(self.app, 
+                                    os.path.dirname(os.path.realpath(__file__)) + rel_path, 
                                     os.path.dirname(os.path.realpath(__file__)) + vertex_shader_path,
                                     os.path.dirname(os.path.realpath(__file__)) + fragment_shader_path)
         else:
-            return renderAPI.createModel(abs_path, 
+            return renderAPI.createModel(self.app,
+                                    abs_path, 
                                     vertex_shader_path,
                                     fragment_shader_path)
 
-    def addPermanentObject2Window(self, model):
+    def addPermanentObject2App(self, model):
         """
-            Add model to `Renderer's` window as permanent drawable objects.
+            Add model to `Renderer's` application as permanent drawable objects.
         """
-        renderAPI.addPermanent2Window(self.window, model)
+        renderAPI.addPermanent2App(self.app, model)
 
-    def addInstantanousObject2Window(self, model):
+    def addInstantanousObject2App(self, model):
         """
-            Add model to `Renderer's` window as instantaneous drawable objects.
+            Add model to `Renderer's` application as instantaneous drawable objects.
         """
-        renderAPI.addInstantaneous2Window(self.window, model)
+        renderAPI.addInstantaneous2App(self.app, model)
 
     def translateModel(self, model, x, y, z):
         """
@@ -121,19 +123,19 @@ class Renderer(object):
             Get FPS of `Renderer's` window.
             Return will be float.
         """
-        return renderAPI.getFps(self.window)
+        return renderAPI.getFps(self.app)
 
     def setFPS(self, fps):
         """
             Set FPS of `Renderer's` window.
         """
-        renderAPI.setFps(self.window, fps)
+        renderAPI.setFps(self.app, fps)
 
     def getCamera(self):
         """
             Get Camera of `Renderer's` window.
         """
-        return renderAPI.getCamera(self.window)
+        return renderAPI.getCamera(self.app)
 
     def setCameraPos(self, x, y, z):
         """
@@ -165,19 +167,19 @@ class Renderer(object):
             Check whether `Renderer's` window is visible or not. 
             Return will be boolean.
         """
-        return renderAPI.isVisible(self.window)
+        return renderAPI.isVisible(self.app)
 
     def hideWindow(self):
         """
             Hide `Renderer's` window.
         """
-        renderAPI.hideWindow(self.window)
+        renderAPI.hideWindow(self.app)
 
     def showWindow(self):
         """
             Show `Renderer's` window.
         """
-        renderAPI.showWindow(self.window)
+        renderAPI.showWindow(self.app)
 
     def createGuiText(self, title, pos_x, pos_y, size_x, size_y):
         """
@@ -203,18 +205,18 @@ class Renderer(object):
             >>> size_y   : Size of guiText in y.
             >>> type     : float
         """
-        return GuiText(self.window, title, pos_x, pos_y, size_x, size_y)
+        return GuiText(self.app, title, pos_x, pos_y, size_x, size_y)
 
     def addGuiText(self, guiText, str, val):
 
-        renderAPI.addGuiText(self.window, guiText, str, val)
+        renderAPI.addGuiText(self.app, guiText, str, val)
 
     def setGuiText(self, guiText, str, val):
         """
             Set guiText.
             str and val are should be list.
         """
-        renderAPI.setGuiText(self.window, guiText, str, val)
+        renderAPI.setGuiText(self.app, guiText, str, val)
 
     def setUniformBool(self, model, name, value):
         """

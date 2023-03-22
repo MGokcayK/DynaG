@@ -16,16 +16,16 @@ public:
     ) {};
 
     // Draws the model, and thus all its meshes
-    virtual void draw() = 0;
+    virtual void draw() {};
 
     // Translate the model to `translation` points.
-    virtual void translate(glm::vec3 translation) = 0;
+    virtual void translate(glm::vec3 translation) {};
 
     // Rotate the model to that angle.
-    virtual void rotate(float angle, glm::vec3 rotation) = 0;
+    virtual void rotate(float angle, glm::vec3 rotation) {};
 
     // Scale the model
-    virtual void scale(glm::vec3 scaling) = 0;
+    virtual void scale(glm::vec3 scaling) {};
 
 };
 

@@ -41,7 +41,7 @@ class Helicopter():
                                                           '/resources/shaders/'+ self.heliName +'_vertex.vs',
                                                           '/resources/shaders/'+ self.heliName +'_frag.fs')
 
-        renderer.addPermanentObject2Window(self.helicopterRenderObj)
+        renderer.addPermanentObject2App(self.helicopterRenderObj)
 
     ############################# HELICOPTER - API RELATION ################################
     def ready(self):

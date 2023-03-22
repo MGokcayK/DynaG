@@ -1,52 +1,66 @@
 #include "ren_api.h"
 
 
-WindowBase* createWindow(const unsigned int WIDTH,
-		const unsigned int HEIGHT,
-		const char* title)
+ApplicationBase* createApplication(const unsigned int _width,
+		const unsigned int _height,
+		const char* _title,
+		const bool _vulkan)
 {
-	return new OpenGL::Window(WIDTH, HEIGHT, title);
+	if (_vulkan) return new Vulkan::Application(_width, _height, _title);
+	else return new OpenGL::Application(_width, _height, _title);
 }
 
 
-void close(WindowBase* window)
+void close(ApplicationBase* app)
 {
-	glfwSetWindowShouldClose(window->wWindow, true);
+	glfwSetWindowShouldClose(app->getWindow()->wWindow, true);
 }
 
 
-bool isClose(WindowBase* window)
+bool isClose(ApplicationBase* app)
 {
-	return glfwWindowShouldClose(window->wWindow);
+	return glfwWindowShouldClose(app->getWindow()->wWindow);
 }
 
 
-void render(WindowBase* window)
+void render(ApplicationBase* app)
 {
-	window->render();
+	app->getWindow()->render();
 }
 
 
-void terminateWindow()
+void terminateApplication()
 {
 	glfwTerminate();
 }
 
-ModelBase* createModel(char* model_path, char* vertex_shader_file_path, char* fragment_shader_file_path)
+ModelBase* createModel(ApplicationBase* app, char* model_path, char* vertex_shader_file_path, char* fragment_shader_file_path)
 {
-	return new OpenGL::Model(model_path, vertex_shader_file_path, fragment_shader_file_path);
+	if (app->api == ApplicationAPI::kVulkan)
+	{
+		return app->createModel(model_path, vertex_shader_file_path, fragment_shader_file_path);
+	}
+	else if (app->api == ApplicationAPI::kOpenGL)
+	{
+		return app->createModel(model_path, vertex_shader_file_path, fragment_shader_file_path);
+	}
+	else
+	{
+		std::cout << "Unknown Application!" << std::endl;
+		return nullptr;
+	}
 }
 
 
-void addPermanent2Window(OpenGL::Window* window, ModelBase* model)
+void addPermanent2App(ApplicationBase* app, ModelBase* model)
 {
-	window->addPermanentDrawables(model);
+	app->getWindow()->addPermanentDrawables(model);
 }
 
 
-void addInstantaneous2Window(OpenGL::Window* window, ModelBase* model)
+void addInstantaneous2App(ApplicationBase* app, ModelBase* model)
 {
-	window->addInstantaneousDrawables(model);
+	app->getWindow()->addInstantaneousDrawables(model);
 }
 
 
@@ -68,23 +82,24 @@ void scaleModel(ModelBase* model, float x, float y, float z)
 }
 
 
-float getFps(WindowBase* window)
+float getFps(ApplicationBase* app)
 {
-	return window->fFPS;
+	return app->getWindow()->fFPS;
 }
 
 
-void setFps(WindowBase* window, float fps)
+void setFps(ApplicationBase* app, float fps)
 {
+	const auto& window = app->getWindow();
 	window->fFPSLimit = fps;
 	std::chrono::nanoseconds dt{static_cast<long int>( 1000000000.0f/window->fFPSLimit)};
 	window->secDt = dt;
 }
 
 
-Camera* getCamera(WindowBase* window)
+Camera* getCamera(ApplicationBase* app)
 {
-	return window->cmCamera;
+	return app->getWindow()->cmCamera;
 }
 
 
@@ -102,67 +117,70 @@ float* getCameraPos(Camera* camera)
 
 
 
-bool isVisible(WindowBase* window)
+bool isVisible(ApplicationBase* app)
 {
-	int visible = glfwGetWindowAttrib(window->wWindow, GLFW_VISIBLE);
+	int visible = glfwGetWindowAttrib(app->getWindow()->wWindow, GLFW_VISIBLE);
 	return visible;
 }
 
 
-void hideWindow(WindowBase* window)
+void hideWindow(ApplicationBase* app)
 {
-	glfwHideWindow(window->wWindow);
+	glfwHideWindow(app->getWindow()->wWindow);
 }
 
 
-void showWindow(WindowBase* window)
+void showWindow(ApplicationBase* app)
 {
-	glfwShowWindow(window->wWindow);
+	glfwShowWindow(app->getWindow()->wWindow);
 }
 
-int createGuiTextVector(WindowBase* window, const char* title,
+int createGuiTextVector(ApplicationBase* app, const char* title,
 									float pos_x, float pos_y,
 									float size_x, float size_y)
 {
 	ImVec2 pos = ImVec2(pos_x, pos_y);
 	ImVec2 size = ImVec2(size_x, size_y);
-	return window->createGuiText(title, pos, size);
+	return app->getWindow()->createGuiText(title, pos, size);
 }
 
-void addGuiTextAllLines(WindowBase* window, int v_guiText_ind, int size, char** _str, float* _val)
+void addGuiTextAllLines(ApplicationBase* app, int v_guiText_ind, int size, char** _str, float* _val)
 {
+	const auto& window = app->getWindow();
 	for (int i = 0; i < size; i++)
 		window->addItem2GuiText(v_guiText_ind, _str[i], &_val[i] );
 }
 
-void addGuiTextLine(WindowBase* window, int v_guiText_ind, char* _text, float* _val)
+void addGuiTextLine(ApplicationBase* app, int v_guiText_ind, char* _text, float* _val)
 {
 	float* v = (float*)malloc(1);
-	window->addItem2GuiText(v_guiText_ind, strdup(_text), v);
+	app->getWindow()->addItem2GuiText(v_guiText_ind, strdup(_text), v);
 }
 
-void setGuiTextAllValues(WindowBase* window, int v_guiText_ind, int size, float* _val)
+void setGuiTextAllValues(ApplicationBase* app, int v_guiText_ind, int size, float* _val)
 {
+	const auto& window = app->getWindow();
 	for (int i = 0; i < size; i++)
 	{
 		window->setGuiTextLineValue(v_guiText_ind, i, &_val[i]);
 	}
 }
 
-void setGuiTextAllTextLines(WindowBase* window, int v_guiText_ind, int size, char** _text)
+void setGuiTextAllTextLines(ApplicationBase* app, int v_guiText_ind, int size, char** _text)
 {
+	const auto& window = app->getWindow();
 	for (int i = 0; i < size; i++)
 		window->setGuiTextLine(v_guiText_ind, i, _text[i]);
 }
 
-void setGuiTextLineValue(WindowBase* window, int v_guiText_ind, int iLineNumber, float* _val)
+void setGuiTextLineValue(ApplicationBase* app, int v_guiText_ind, int iLineNumber, float* _val)
 {
-	window->setGuiTextLineValue(v_guiText_ind, iLineNumber, _val);
+	app->getWindow()->setGuiTextLineValue(v_guiText_ind, iLineNumber, _val);
 }
 
-void setGuiTextLine(WindowBase* window, int v_guiText_ind, int iLineNumber, char* _text)
+void setGuiTextLine(ApplicationBase* app, int v_guiText_ind, int iLineNumber, char* _text)
 {
-	window->setGuiTextLine(v_guiText_ind, iLineNumber, _text);
+	app->getWindow()->setGuiTextLine(v_guiText_ind, iLineNumber, _text);
 }
 
 

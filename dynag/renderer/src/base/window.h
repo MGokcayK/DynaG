@@ -1,5 +1,5 @@
 #ifndef BASE_WINDOW
-#define BASE_WIDNOW
+#define BASE_WINDOW
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -17,6 +17,7 @@
 #include <thread>
 #include <vector>
 #include <variant>
+#include <memory>
 
 // Create basic structure for ImGui text. With this structure
 // text gui has only one values for a text. 
@@ -61,11 +62,13 @@ protected:
     std::vector<guiText> vGuiText;
 
     // Drawing of window which called by render function.
-    virtual void draw() = 0;
+    virtual void draw() {};
 
     // Sleep the window for sync the FPS of window when the FPS is higher
     // than dynamic system FPS (which calculated in Python side).
     void preciseSleep(double seconds);
+
+    GLFWwindow* getGLFWwindow() const;
 
     // Projection view for vertex-shaders for each shader.
     glm::mat4 mProjectionView = glm::mat4(1.0f);
@@ -88,17 +91,18 @@ public:
 
     // Basic Window constructor.
     WindowBase() {};
+    virtual ~WindowBase();
 
-    // Window constructor with Width, Height and Title parameters.
-    WindowBase(const unsigned int SCR_WIDTH,
-        const unsigned int SCR_HEIGHT,
-        const char* title) {};
+    WindowBase(const WindowBase&) = delete;
+    WindowBase& operator=(const WindowBase&) = delete;
+
+    bool shouldClose();
 
     // Render the Window.
-    virtual void render() = 0;
+    virtual void render() {};
 
     // Render the Dear ImGui.
-    virtual void renderGUI() = 0;
+    virtual void renderGUI() {};
 
     // Create empty guiText vector and its adress.
     int createGuiText(const char* title, ImVec2 position, ImVec2 size);
@@ -113,13 +117,13 @@ public:
     // Callbacks.
 
     // When window size changed, GLFW call this callback function.
-    virtual void frameBufferSizeCallback(GLFWwindow* window, int width, int height) = 0;
+    virtual void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {};
 
     // When mouse moves, GLFW call this call function.
-    virtual void mouseCallback(GLFWwindow* window, double xpos, double ypos) = 0;
+    virtual void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
     // When mouse scroll changed (wheel rotate etc.), GLFW call this function.
-    virtual void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) = 0;
+    virtual void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
     // GLFW need static callback functions. To handle it, some capsulation should
     // be done. This function makes it.
@@ -143,5 +147,4 @@ public:
     void addInstantaneousDrawables(ModelBase* drawable);
 
 };
-
-#endif
+#endif 
